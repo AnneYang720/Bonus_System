@@ -90,10 +90,16 @@ def getProgressList(planId):
     allProject = BonusDetailModel.query.filter_by(planId=planId, projectType=0).all()
     proProgressList = []
     for pro in allProject:
-        curres = resInfo[pro.id]
+        curres = resInfo[pro.projectId]
         userInfo = UsersModel.query.get(curres.manager)
-        if(pro.amount_zhan!=pro.amount): state = 1
-        else: state = 0
+
+        state = 0
+        if(not curres.isBig):
+            if(pro.amount_zhan!=pro.amount): state = 1
+        else:
+            detail = KeshiDetailModel.query.filter_by(planId=planId, projectId=curres.id, projectType=0).first()
+            if(detail is None): state = 1
+        
         proProgressList.append({"projectName":curres.name,"manager":userInfo.username,"state":state})
     
     proProgressList.sort(key= lambda x:x["state"], reverse=True)
