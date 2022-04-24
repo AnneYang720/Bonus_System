@@ -1,6 +1,6 @@
 *.zip
 *.sql
-*.conf
+# *.conf
 .VSCodeCounter
 
 __pycache__

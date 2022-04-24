@@ -210,8 +210,6 @@ export default {
             }).catch((err) => {
                 this.userList = []
             });
-            
-
         },
 
         fetchPrivateWorkersList(){
