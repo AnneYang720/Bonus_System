@@ -319,7 +319,7 @@ export default {
             }
 
             if(totalb - this.curRow.amountb > 0.00001){
-                this.$message.error('已分发总额(不占工资B类)超过奖金包')
+                this.$message.error('已分发总额(不占工资总额)超过奖金包')
                 return false
             }
 
@@ -494,7 +494,7 @@ export default {
                     }
 
                     if(totalb - row.amountb > 0.00001){
-                        vm.$message.error('已分发总额(不占工资B类)超过奖金包')
+                        vm.$message.error('已分发总额(不占工资总额)超过奖金包')
                         return false
                     }
 
