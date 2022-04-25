@@ -147,8 +147,6 @@ export default {
         },
         emptyDict(dict_){
           for (var key in dict_) {
-　　          var item = dict_[key];
-　　          console.log(item); 
               dict_[key] ='';
           }
         },

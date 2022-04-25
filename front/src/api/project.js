@@ -96,29 +96,6 @@ export default{
         })
     },
 
-    createKeshiDetail(pojo){
-        return request({
-            url: `/project/createkeshidetail`,
-            method: 'post',
-            data: pojo
-        })
-    },
-
-    changeKeshiDetail(pojo){
-        return request({
-            url: `/project/changekeshidetail`,
-            method: 'post',
-            data: pojo
-        })
-    },
-
-    delKeshiDetail(detailId){
-        return request({
-            url: `/project/delkeshi/${detailId}`, //ES6写法
-            method: 'delete',    
-        })
-    },
-
     getAllDetail(planId){
         return request({
             url: `/project/getdetail/${planId}`, //ES6写法

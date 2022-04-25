@@ -38,7 +38,7 @@
       </el-table-column>
 
       <el-table-column
-        prop="category" label="类别" width="80"
+        prop="category" label="类别" width="80">
       </el-table-column>
 
       <el-table-column

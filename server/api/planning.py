@@ -146,7 +146,7 @@ def searchProject(page,size):
     return jsonify(code=RET.OK, flag=True, message='搜索科研项目成功', data=projectList, total=total)
 
 
-
+# 导入科研项目
 @planning_blue.route('/importprojects', methods=['POST'])
 def importProjects():
     rows = request.json.get('rows')
