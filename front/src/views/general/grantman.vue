@@ -11,8 +11,21 @@
     </div>
 
     <div>
-       <el-button style="margin-left:5%;margin-top:5%" type="primary" @click="openAdd()">添加</el-button>
+        <el-button style="margin-left:5%;margin-top:5%" type="primary" @click="openAdd()">添加</el-button>
+        <el-button type="info" icon="el-icon-download" @click="exportTemp">模板导出</el-button>
     </div>
+
+    <el-col :span="12" style="margin-left:5%;margin-top:1%">
+      <el-upload
+        action="aaa"
+        accept=".xlsx"
+        :multiple="false"
+        :auto-upload="false"
+        :on-change="handleUploadChange"
+        :file-list="fileList">
+        <el-button type="warning" icon="el-icon-upload2" >模板导入</el-button>
+      </el-upload>
+    </el-col>
 
     <el-table
       :data="proDetailList"
@@ -91,8 +104,8 @@
             <el-input v-model="newProDetailForm.amount" placeholder="占工资总额（单位：元）"></el-input>
         </el-form-item>
 
-        <el-form-item label="B类奖金金额">
-            <el-input v-model="newProDetailForm.amountb" placeholder="B类不占工资总额（单位：元）"></el-input>
+        <el-form-item label="不占工资总额奖金金额">
+            <el-input v-model="newProDetailForm.amountb" placeholder="不占工资总额（单位：元）"></el-input>
         </el-form-item>
 
       </el-form>
@@ -158,6 +171,9 @@ export default {
 
             chosenPlan: '',
             curChosenPlan: '',
+
+            allManDetailList: [],
+            fileList: []
         }
     },
     created () {
@@ -308,9 +324,67 @@ export default {
             });
 
             return sums;
-        }
+        },
 
+        exportTemp(){
+            if(this.curChosenPlan==''){
+                this.$message.error('请选择发放计划')
+                return false
+            }
 
+            detailApi.getAllManProjectDetailList(this.curChosenPlan).then(response =>{
+                this.allManDetailList = response.data;
+
+                var ws = XLSX.utils.aoa_to_sheet(this.allManDetailList)
+                var wb = XLSX.utils.book_new()
+                XLSX.utils.book_append_sheet(wb, ws, "sheet");
+                let wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'array' })
+                
+                try {
+                    FileSaver.saveAs(new Blob([wbout], { type: 'application/octet-stream' }), '科研项目模板.xlsx')
+                } catch (e) { 
+                    if (typeof console !== 'undefined') console.log(e, wbout) 
+                }
+            }).catch((err) => {
+                this.allManDetailList = []
+            });
+        },
+
+        handleUploadChange(file, fileList) {
+            // console.log('b')
+            if(this.curChosenPlan==''){
+                this.fileList = []
+                this.$message.error('请选择发放计划')
+                return false
+            }
+            if (fileList.length > 0) {
+                this.fileList = [fileList[fileList.length - 1]] // 这一步，是展示最后一次选择的文件
+            }
+            
+            this.$confirm('确认导入该模板', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(async() => {
+                var reader = new FileReader();
+                var planId = this.curChosenPlan
+                var vm = this
+                reader.onload = function (e) {
+                    var workbook = XLSX.read(e.target.result, {
+                        type: 'binary'
+                    });
+                    var Sheet = workbook.SheetNames[0];
+                    var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[Sheet]);
+                    detailApi.createManDetailFromFile(planId, excelRows).then(async(response) => {
+                        if(response.flag){//如果成功
+                            vm.$message.success(response.message)
+                            vm.handleShowDetail(this.curChosenPlan)
+                        }
+                    })
+                };
+                reader.readAsBinaryString(this.fileList[0].raw);
+            })
+        },
     },
 }
       

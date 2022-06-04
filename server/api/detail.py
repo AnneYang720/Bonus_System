@@ -58,6 +58,23 @@ def getManProjectDetailList(planId):
     
     return jsonify(code=RET.OK, flag=True, message='获取该次方法计划分配信息成功', data=detailList)
 
+# 用于导出管理项目奖金包分配（每个项目分多少）的信息
+@detail_blue.route('/getallmanprojectdetail/<int:planId>', methods=['GET'])
+@authorize
+def getAllManProjectDetailList(planId): 
+    allProject = ManageModel.query.filter_by(state="进行中").all()
+    allProDetailList = []
+    allProDetailList.append(["项目名称","金额（占工资总额）","金额（不占工资总额）"])
+
+    for pro in allProject:
+        detailInfo = BonusDetailModel.query.filter_by(planId=planId, projectType=1, projectId=pro.id).first()
+        if(detailInfo is None):
+            allProDetailList.append([pro.name,0,0])
+        else:
+            allProDetailList.append([pro.name,detailInfo.amount,detailInfo.amount_b])
+       
+    return jsonify(code=RET.OK, flag=True, message='获取该次方法计划分配模板成功', data=allProDetailList)
+
 
 # 增加一条科研项目奖金包分配（每个项目分多少）的信息
 @detail_blue.route('/createresdetail', methods=['POST'])
@@ -109,6 +126,31 @@ def createResProjectDetailFromFile():
                     detail.update()
             else:
                 detail = BonusDetailModel(planId=planId, projectId=projectId, projectType=0, amount=row['金额'])
+                result = BonusDetailModel.add(BonusDetailModel, detail)
+
+    return jsonify(code=RET.OK, flag=True, message='导入分配模板成功')
+
+# 导入管理项目奖金包分配（每个项目分多少）的信息
+@detail_blue.route('/importmandetail', methods=['POST'])
+@authorize
+def createManProjectDetailFromFile(): 
+    planId = request.json.get('planId')
+    rows = request.json.get('rows')
+
+    for row in rows:
+        projectId = ManageModel.query.filter_by(name=row['项目名称']).first().id
+        if((row.get('金额（占工资总额）')==0 or row.get('金额（占工资总额）')==None) and (row.get('金额（不占工资总额）')==0 or row.get('金额（不占工资总额）')==None)):
+            detail = BonusDetailModel.query.filter_by(planId=planId, projectType=1, projectId=projectId).first()
+            if(detail):
+                detail.delete(detail.id)
+        else:
+            detail = BonusDetailModel.query.filter_by(planId=planId, projectType=1, projectId=projectId).first()
+            if(detail):
+                detail.amount = row['金额（占工资总额）']
+                detail.amountb = row['金额（不占工资总额）']
+                detail.update()
+            else:
+                detail = BonusDetailModel(planId=planId, projectId=projectId, projectType=1, amount=row['金额（占工资总额）'], amount_b=row['金额（不占工资总额）'])
                 result = BonusDetailModel.add(BonusDetailModel, detail)
 
     return jsonify(code=RET.OK, flag=True, message='导入分配模板成功')

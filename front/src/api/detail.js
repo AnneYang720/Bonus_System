@@ -22,6 +22,13 @@ export default{
         })
     },
 
+    getAllManProjectDetailList(planId){
+        return request({
+            url: `/detail/getallmanprojectdetail/${planId}`, //ES6写法
+            method: 'get',    
+        })
+    },
+
     createResDetail(pojo){
         return request({
             url: `/detail/createresdetail`,
@@ -46,6 +53,17 @@ export default{
             url: `/detail/createmandetail`,
             method: 'post',
             data: pojo
+        })
+    },
+
+    createManDetailFromFile(planId,rows){
+        return request({
+            url: `/detail/importmandetail`,
+            method: 'post',
+            data: {
+                planId,
+                rows
+            }
         })
     },
 
