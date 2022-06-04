@@ -7,19 +7,19 @@
 
         <el-form-item label="所级项目编号">
           <el-col :span="8">
-            <el-input v-model="newProjectForm.number" placeholder="选填写所级项目编号"></el-input>
+            <el-input v-model="newProjectForm.number" placeholder="填写所级项目编号"></el-input>
           </el-col>
         </el-form-item>
         
         <el-form-item label="项目名称">
           <el-col :span="8">
-            <el-input v-model="newProjectForm.name" placeholder="选填写项目名称"></el-input>
+            <el-input v-model="newProjectForm.name" placeholder="填写项目名称"></el-input>
           </el-col>
         </el-form-item>
 
         <el-form-item label="项目经理">
           <el-col :span="8">
-            <el-input v-model="newProjectForm.manager" placeholder="选填写项目经理工号"></el-input>
+            <el-input v-model="newProjectForm.manager" placeholder="填写项目经理工号"></el-input>
           </el-col>
         </el-form-item>
 

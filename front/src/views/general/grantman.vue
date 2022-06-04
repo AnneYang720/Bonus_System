@@ -110,12 +110,12 @@
 
       <el-form label-width="100px" :model="changeProDetailForm" ref="newProjectForm">  
         
-        <el-form-item label="奖金金额">
+        <el-form-item label="奖金金额（占工资总额）">
             <el-input v-model="changeProDetailForm.amount" placeholder="占工资总额（单位：元）"></el-input>
         </el-form-item>
 
-        <el-form-item label="B类奖金金额">
-            <el-input v-model="changeProDetailForm.amountb" placeholder="B类不占工资总额（单位：元）"></el-input>
+        <el-form-item label="奖金金额（不占工资总额）">
+            <el-input v-model="changeProDetailForm.amountb" placeholder="不占工资总额（单位：元）"></el-input>
         </el-form-item>
 
       </el-form>

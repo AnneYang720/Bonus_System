@@ -100,8 +100,7 @@ def getMemberDetail():
     keshiId = request.form.get('keshiId')
     keshi_manager = KeshiModel.query.get(keshiId).manager
 
-    if(projectType=='0'): memberInfo = UsersModel.query.filter_by(keshi=keshiId).all()
-    else: memberInfo = UsersModel.query.filter(UsersModel.keshi==keshiId).all()
+    memberInfo = UsersModel.query.filter_by(keshi=keshiId).all()
     
     memberDetailList = []
 

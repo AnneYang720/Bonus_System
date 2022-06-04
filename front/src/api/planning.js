@@ -30,13 +30,6 @@ export default{
         });
     },
 
-    getProjectDetailList(planId){
-        return request({
-            url: `/planning/getprojectdetail/${planId}`, //ES6写法
-            method: 'post',    
-        })
-    },
-
     search(page,size,keyword){
         return request({
             url: `/planning/search/${page}/${size}?q=${keyword}`,//ES6写法

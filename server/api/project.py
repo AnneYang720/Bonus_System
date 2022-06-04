@@ -107,7 +107,7 @@ def getProgressList(planId):
     return jsonify(code=RET.OK, flag=True, message='获取项目经理分配进度信息成功',data=proProgressList)
 
 
-# 获取科研项目奖金包分配（每个项目分多少）的信息
+# 获取大项目奖金包分配（每个科室分多少）的信息
 @project_blue.route('/getbigprojectdetail', methods=['POST'])
 @authorize
 def getBigProjectDetail(): 
@@ -138,6 +138,7 @@ def getBigProjectDetail():
     return jsonify(code=RET.OK, flag=True, message='获取该次方法计划分配信息成功', data=detailList)
 
 # 增加大项目奖金包分配（每个室分多少）的信息
+# TODO 更新占不占工资总额
 @project_blue.route('/createallkeshidetail', methods=['POST'])
 @authorize
 def createAllKeshiDetail(): 
@@ -164,61 +165,6 @@ def createAllKeshiDetail():
     return jsonify(code=RET.OK, flag=True, message='新增项目奖金包所有科室分配信息成功')
 
 
-# 增加一条大项目奖金包分配（每个室分多少）的信息
-# TODO 更新占不占工资总额
-@project_blue.route('/createkeshidetail', methods=['POST'])
-@authorize
-def createKeshiDetail(): 
-    planId = request.json.get('planId')
-    keshiId = request.json.get('keshiId')
-    projectId = request.json.get('projectId')
-    projectType = request.json.get('projectType')
-    amount = request.json.get('amount')
-
-    detail = KeshiDetailModel.query.filter_by(planId=planId, keshiId=keshiId, projectId=projectId, projectType=projectType).first()
-    if (detail):
-        return jsonify(code=RET.NODATA, flag=False, message='该科室奖金包已分配')
-
-    detail = KeshiDetailModel(planId=planId, projectId=projectId, projectType=projectType, keshiId=keshiId, amount=amount)
-
-    result = KeshiDetailModel.add(KeshiDetailModel, detail)
-
-    if detail.id:
-        return jsonify(code=RET.OK, flag=True, message='新增项目奖金包科室分配信息成功')
-    else:
-        return jsonify(code=RET.DBERR, flag=False, message='新增项目奖金包科室分配信息失败')
-
-# 修改一条项目奖金包分配（每个科室分多少）的信息
-@project_blue.route('/changekeshidetail', methods=['POST'])
-@authorize
-def changeKeshiDetail(): 
-    id = request.json.get('id')
-    amount = request.json.get('amount')
-
-    detail = KeshiDetailModel.query.get(id)
-    if (detail is None):
-        return jsonify(code=RET.NODATA, flag=False, message='该条信息不存在')
-    
-    detail.amount = amount
-    detail.update()
-
-    if detail.id:
-        return jsonify(code=RET.OK, flag=True, message='修改科室奖金包分配信息成功')
-    else:
-        return jsonify(code=RET.DBERR, flag=False, message='修改科室奖金包分配信息失败')
-
-
-# 删除一条项目奖金包分配（每个科室分多少）的信息
-@project_blue.route('/delkeshi/<int:id>', methods=['DELETE'])
-@authorize
-def delKeshiDetail(id): 
-    detail = KeshiDetailModel.query.get(id)
-    if (detail is None):
-        return jsonify(code=RET.NODATA, flag=False, message='该条信息不存在')
-    detail.delete(id)
-    return jsonify(code=RET.OK, flag=True, message='删除项目奖金包分配信息成功')
-
-
 # 获取项目成员信息
 @project_blue.route('/getmember', methods=['POST'])
 @authorize
@@ -238,7 +184,7 @@ def getMember():
     
     return jsonify(code=RET.OK, flag=True, message='获取该项目成员信息成功', data=memberList)
 
-# 获取项目成员信息
+# 添加项目成员
 @project_blue.route('/addmember', methods=['POST'])
 @authorize
 def addMember(): 
@@ -288,6 +234,7 @@ def delMember(id,planId):
 
     memberdetail = UserDetailModel.query.filter_by(planId=planId, projectId=member.projectId, projectType=member.projectType, userId=member.userId).first()
     if(memberdetail):
+        # TODO 更新该项目已发占（不占）的金额
         memberdetail.delete(memberdetail.id)
 
     return jsonify(code=RET.OK, flag=True, message='删除项目成员成功')
@@ -443,7 +390,7 @@ def importMemberDetail():
 
 
      
-# 获取所有人每个科研项目分多少钱的总体信息
+# 获取本人科研项目的所有人每个科研项目分多少钱的总体信息
 @project_blue.route('/getdetail/<int:planId>', methods=['GET'])
 @authorize
 def getAllDetail(planId):
@@ -464,7 +411,7 @@ def getAllDetail(planId):
             cur = ManageModel.query.get(project.projectId)
             name = cur.name
         if(cur.manager==userId):
-            projectList.append({"id":str(cur.id), "type":str(project.projectType),"name":name})
+            projectList.append({"id":str(cur.id), "type":str(project.projectType),"name":name})            
             alldetail = UserDetailModel.query.filter_by(planId=planId, projectId=cur.id, projectType=0).all()
             for detail in alldetail:
                 if(detail.userId not in memberTmp):

@@ -277,7 +277,7 @@ export default {
             }
 
             if(totalb - this.curRow.amountb > 0.00001){
-                this.$message.error('已分发总额(不占工资B类)超过奖金包')
+                this.$message.error('已分发总额(不占工资总额)超过奖金包')
                 return false
             }
 
@@ -406,7 +406,7 @@ export default {
                     }
 
                     if(totalb - row.amountb > 0.00001){
-                        vm.$message.error('已分发总额(不占工资B类)超过奖金包')
+                        vm.$message.error('已分发总额(不占工资总额)超过奖金包')
                         return false
                     }
 
@@ -543,8 +543,8 @@ export default {
                             return false
                         }
 
-                        console.log('uploadall')
-                        console.log(total)
+                        // console.log('uploadall')
+                        // console.log(total)
 
                         if(total-project.amount>0.00001 || project.amount-total>0.00001){
                             vm.$message.error('项目'+project.projectName+'已分发总额(占工资)与奖金包不相等')
@@ -553,7 +553,7 @@ export default {
                         }
 
                         if(totalb - project.amountb > 0.00001){
-                            vm.$message.error('项目'+project.projectName+'已分发总额(不占工资B类)超过奖金包')
+                            vm.$message.error('项目'+project.projectName+'已分发总额(不占工资总额)超过奖金包')
                             flag = true
                             return false
                         }                        

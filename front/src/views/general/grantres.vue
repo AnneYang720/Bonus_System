@@ -186,6 +186,10 @@ export default {
         },
 
         handleShowDetail(){
+            if(this.chosenPlan==''){
+                this.$message.error('请选择发放计划')
+                return false
+            }
             this.curChosenPlan = this.chosenPlan
             detailApi.getResProjectDetailList(this.curChosenPlan).then(response =>{
                 this.proDetailList = response.data;

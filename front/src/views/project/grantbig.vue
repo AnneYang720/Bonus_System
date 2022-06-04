@@ -17,10 +17,6 @@
     <div style="margin-left:5%;margin-top:2%"> 占工资总额奖金包：{{curProjectTotal}}(元) </div>
     
 
-    <!-- <div>
-       <el-button style="margin-left:5%;margin-top:5%" type="primary" @click="openAdd()">添加</el-button>
-    </div> -->
-
     <div>
        <el-button style="margin-left:5%;margin-top:5%" type="primary" @click="openWrite()">填写</el-button>
     </div>
@@ -73,32 +69,8 @@
       </el-table-column> -->
     </el-table>
 
-    <!-- 增加项目金额分配弹出窗口 -->
-    <el-dialog
-      title="添加科室奖金"
-      :visible.sync="addVisible"
-      width="30%"
-      >
 
-      <el-form label-width="100px" :model="newKeshiDetailForm" ref="newProjectForm">  
-        
-        <el-form-item label="科室">
-          <el-select v-model="newKeshiDetailForm.keshiId" >
-            <el-option v-for="item in keshiList" :label="item.name" :key="item.id" :value="item.id"/>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="奖金金额">
-            <el-input v-model="newKeshiDetailForm.amount" placeholder="占工资总额（单位：元）"></el-input>
-        </el-form-item>
-
-      </el-form>
-
-      <el-button @click="handleAdd()" type="warning" style="margin-left:5%" size="small">新增</el-button>
-
-    </el-dialog>
-
-    <!-- 修改项目金额分配弹出窗口 -->
+    <!-- 修改项目金额分配弹出窗口
     <el-dialog
       title="修改项目奖金"
       :visible.sync="changeVisible"
@@ -115,7 +87,7 @@
 
       <el-button @click="handleChange()" type="warning" style="margin-left:5%" size="small">修改</el-button>
 
-    </el-dialog>
+    </el-dialog> -->
 
     <!-- 科室分配奖金弹出窗口 -->
     <el-dialog
@@ -141,9 +113,7 @@
 
 </template>
 <script>
-import planningApi from '@/api/planning'
 import generalApi from '@/api/general'
-import detailApi from '@/api/detail'
 import projectApi from '@/api/project'
 
 export default {
@@ -161,14 +131,6 @@ export default {
             keshiList: [],
             proDetailList: [],
 
-            newKeshiDetailForm:{
-                planId: '',
-                keshiId: '',
-                projectId: '',
-                projectType: '',
-                amount: '',
-            },
-
             allKeshiDetailForm:{
                 planId: '',
                 projectId: '',
@@ -181,16 +143,7 @@ export default {
                 }]
             },
 
-
-            changeKeshiDetailForm:{
-                id: '',
-                amount: '',
-            },
-
-            addVisible: false,
             writeVisible: false,
-            changeVisible: false,
-            
         }
     },
     created () {
@@ -260,19 +213,6 @@ export default {
 
         },
 
-
-        openAdd(){
-            if(this.curChosenPlan==''){
-                this.$message.error('请选择发放计划')
-                return false
-            }
-            if(this.curProjectId==''){
-                this.$message.error('请选择项目')
-                return false
-            }
-            this.addVisible = true
-        },
-
         openWrite(){
             if(this.curChosenPlan==''){
                 this.$message.error('请选择发放计划')
@@ -287,47 +227,7 @@ export default {
             this.allKeshiDetailForm.keshiDetailList=JSON.parse(JSON.stringify(this.proDetailList))
 
             this.writeVisible = true
-        },
-
-        closeAdd(){
-            this.handleShowDetail()
-            this.addVisible = false
-            this.newKeshiDetailForm.keshiId=''
-            this.newKeshiDetailForm.amount=''
-        },
-
-        beforeAdd(){
-            if(this.newKeshiDetailForm.keshiId==''){
-                this.$message.error('请选择科室')
-                return false
-            }
-            if(this.newKeshiDetailForm.amount==''){
-                this.$message.error('请填写金额')
-                return false
-            }
-            this.newKeshiDetailForm.planId = this.curChosenPlan
-            this.newKeshiDetailForm.projectId = this.curProjectId
-            this.newKeshiDetailForm.projectType = this.curProjectType
-            return true
-        },
-        
-        // 单独提交某科室金额
-        handleAdd(){
-            this.$confirm('确认新增项目奖金分配', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(async() => {
-                if(this.beforeAdd()){
-                    projectApi.createKeshiDetail(this.newKeshiDetailForm).then(async(response) => {
-                        if(response.flag){//如果成功
-                            this.$message.success(response.message)
-                            this.closeAdd()
-                        }
-                    })
-                }
-            })
-        },
+        },    
 
         // 提交全部科室金额
         handleWrite(){
@@ -355,47 +255,6 @@ export default {
                 }
             })
 
-        },
-
-        handleChange(){
-            this.$confirm('确认修改项目奖金金额', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(async() => {
-                if(this.changeKeshiDetailForm.amount==''){
-                    this.$message.error('请填写金额')
-                    return false
-                }
-                projectApi.changeKeshiDetail(this.changeKeshiDetailForm).then(async(response) => {
-                    if(response.flag){//如果成功
-                        this.$message.success(response.message)
-                        this.changeVisible = false
-                        this.handleShowDetail()
-                    }
-                })
-            })
-        },
-
-        openChange(row){
-          this.changeVisible = true
-          this.changeKeshiDetailForm.id = row.id
-          this.changeKeshiDetailForm.amount = row.amount
-        },
-
-        handleDel(row){
-          this.$confirm('确认删除该项目奖金分配', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(async() => {
-                projectApi.delKeshiDetail(row.id).then(async(response) => {
-                    if(response.flag){//如果成功
-                        this.$message.success(response.message)
-                        this.handleShowDetail(this.curChosenPlan)
-                    }
-                })
-            })
         },
 
         getTotal(param) {

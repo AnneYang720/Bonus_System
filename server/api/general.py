@@ -38,8 +38,6 @@ def makeUserList(userInfo):
 
     for user in userInfo:
         roles = RolesModel.query.filter_by(userId=user.id).all()
-        # keshi = KeshiModel.query.filter_by(id = user.keshi).first()
-        # category = CategoryModel.query.filter_by(id = user.category).first()
         roleslist = []
         for role in roles: roleslist.append(role.role)
         userList.append({
@@ -320,6 +318,44 @@ def getPlanList():
     
     return jsonify(code=RET.OK, flag=True, message='获取所有发放计划成功', data=planList)
 
+# 新增发放计划
+@general_blue.route('/createplan', methods=['POST'])
+@authorize
+def createBonusPlan(): 
+    year = request.json.get('year')
+    quarter = request.json.get('quarter')
+    state = request.json.get('state')
+    name = year+quarter
+
+    plan = BonusPlanModel(name=name, year=year, quarter=quarter, state=state)
+    result = BonusPlanModel.add(ManageModel, plan)
+
+    if plan.id:
+        return jsonify(code=RET.OK, flag=True, message='新增发放计划成功')
+    else:
+        return jsonify(code=RET.DBERR, flag=False, message='新增发放计划失败')
+
+# 修改发放计划
+@general_blue.route('/changeplan', methods=['POST'])
+@authorize
+def changePlan(): 
+    id = request.json.get('id')
+    year = request.json.get('year')
+    quarter = request.json.get('quarter')
+    state = request.json.get('state')
+
+    planInfo = BonusPlanModel.query.get(id)
+    if(planInfo is None):
+        return jsonify(code=RET.NODATA, flag=False, message='该发放计划不存在')
+
+    planInfo.name = year+quarter
+    planInfo.year = year
+    planInfo.quarter = quarter
+    planInfo.state = state
+    planInfo.update()
+
+    return jsonify(code=RET.OK, flag=True, message='修改发放计划信息成功')
+
 # 获取初始化发放计划的信息
 @general_blue.route('/getcurplanlist', methods=['GET'])
 @authorize
@@ -371,44 +407,6 @@ def getShiPlanList():
     return jsonify(code=RET.OK, flag=True, message='获取所有室主任发放中的发放计划成功', data=planList)
 
 
-# 新增发放计划
-@general_blue.route('/createplan', methods=['POST'])
-@authorize
-def createBonusPlan(): 
-    year = request.json.get('year')
-    quarter = request.json.get('quarter')
-    state = request.json.get('state')
-    name = year+quarter
-
-    plan = BonusPlanModel(name=name, year=year, quarter=quarter, state=state)
-    result = BonusPlanModel.add(ManageModel, plan)
-
-    if plan.id:
-        return jsonify(code=RET.OK, flag=True, message='新增发放计划成功')
-    else:
-        return jsonify(code=RET.DBERR, flag=False, message='新增发放计划失败')
-
-
-# 修改发放计划
-@general_blue.route('/changeplan', methods=['POST'])
-@authorize
-def changePlan(): 
-    id = request.json.get('id')
-    year = request.json.get('year')
-    quarter = request.json.get('quarter')
-    state = request.json.get('state')
-
-    planInfo = BonusPlanModel.query.get(id)
-    if(planInfo is None):
-        return jsonify(code=RET.NODATA, flag=False, message='该发放计划不存在')
-
-    planInfo.name = year+quarter
-    planInfo.year = year
-    planInfo.quarter = quarter
-    planInfo.state = state
-    planInfo.update()
-
-    return jsonify(code=RET.OK, flag=True, message='修改发放计划信息成功')
 
 
 #新增加科室
@@ -426,6 +424,10 @@ def addKeshi():
     userInfo = UsersModel.query.filter_by(worknum=worknum).first()
     if (userInfo is None):
         return jsonify(code=RET.NODATA, flag=False, message='该工号不存在')
+
+    keshiInfo = KeshiModel.query.filter_by(manager=userInfo.id).first()
+    if (keshiInfo):
+        return jsonify(code=RET.NODATA, flag=False, message='该工号已是其他室主任')
 
     newKeshi = KeshiModel(name=name, manager=userInfo.id, type=isMan)
     # 添加科室
@@ -496,96 +498,6 @@ def delKeshi(id):
     keshi.delete(id)
     return jsonify(code=RET.OK, flag=True, message='删除该科室成功')
      
-# # 获取所有人每个科研项目分多少钱的总体信息
-# @general_blue.route('/getresdetail/<int:planId>/<int:page>/<int:size>', methods=['GET'])
-# @authorize
-# def getResAllDetail(planId,page,size): 
-#     totalnum = db.session.query(db.func.count(UsersModel.id)).scalar()
-
-#     allMember = UsersModel.query.paginate(page,per_page=size).items
-#     allProject = BonusDetailModel.query.filter_by(planId=planId, projectType=0).all()
-
-#     memberDetailList = []
-#     projectList = []
-
-#     allKeshi = KeshiModel.query.all()
-#     keshiInfo = {}
-#     for keshi in allKeshi:
-#         keshiInfo[keshi.id] = keshi.name
-
-#     allCategory = CategoryModel.query.all()
-#     categoryInfo = {}
-#     for cate in allCategory:
-#         categoryInfo[cate.id] = cate.name
-
-#     for project in allProject:
-#         pro = ResearchModel.query.get(project.projectId)
-#         name = pro.number + ": "+ pro.name
-#         projectList.append({"id":str(project.projectId),"name":name})
-
-#     for member in allMember:
-#         total = 0
-#         # keshi = KeshiModel.query.get(member.keshi).name
-#         keshi = keshiInfo[member.keshi]
-#         # category = CategoryModel.query.get(member.category).name
-#         category = categoryInfo[member.category]
-#         memberdict = {"userId":member.id,"department":member.department,"keshi":keshi,"username":member.username,
-#             "idnum":member.idnum,"category":category,"wage_category":member.wage_category,"remarks":member.remarks}
-       
-#         for project in allProject:
-#             memberdetail = UserDetailModel.query.filter_by(planId=planId, projectId=project.projectId, projectType=0, userId=member.id).first()
-#             if(memberdetail is None):
-#                 memberdict[str(project.projectId)] = 0
-#             else: 
-#                 memberdict[str(project.projectId)] = memberdetail.amount
-#                 total += memberdetail.amount
-
-#             history = DetailHistoryModel.query.filter_by(planId=planId,projectId=project.projectId,projectType=0 ,userId=member.id).first()
-#             if(history is None):
-#                 memberdict[str(project.projectId)+"flag"] = False
-#             else: 
-#                 memberdict[str(project.projectId)+"flag"] = True
-#                 # total += memberdetail.amount
-#         memberdict['total'] = total
-#         memberDetailList.append(memberdict)
-    
-#     if(page==1):
-#         amount = 0
-#         amount_zhan = 0
-#         amount_buzhan = 0
-#         memberdict1 = {"username":"合计(占工资总额)"}
-#         memberdict2 = {"username":"合计(不占工资总额)"}
-#         memberdict3 = {"username":"总合计"}
-#         memberdict4 = {"username":"浮动绩效额度"}
-#         for project in allProject:
-#             projectdetail = BonusDetailModel.query.filter_by(planId=planId, projectId=project.projectId, projectType=0).first()
-#             curamount_zhan = 0 if projectdetail.amount_zhan==None else projectdetail.amount_zhan
-#             curamount_buzhan = 0 if projectdetail.amount_buzhan==None else projectdetail.amount_buzhan
-#             memberdict1[str(project.projectId)] = curamount_zhan
-#             memberdict2[str(project.projectId)] = curamount_buzhan
-#             memberdict3[str(project.projectId)] = curamount_zhan + curamount_buzhan
-#             memberdict1[str(project.projectId)+"flag"] = False
-#             memberdict2[str(project.projectId)+"flag"] = False
-#             memberdict3[str(project.projectId)+"flag"] = False
-#             amount_zhan += curamount_zhan
-#             amount_buzhan += curamount_buzhan
-#             amount += projectdetail.amount
-#             memberdict4[str(project.projectId)] = projectdetail.amount
-#             memberdict4[str(project.projectId)+"flag"] = False
-
-#         memberdict1['total'] = amount_zhan
-#         memberdict2['total'] = amount_buzhan
-#         memberdict3['total'] = amount_zhan + amount_buzhan
-#         memberdict4['total'] = amount
-
-#         memberDetailList.insert(0,memberdict3)
-#         memberDetailList.insert(0,memberdict2)
-#         memberDetailList.insert(0,memberdict1)
-#         memberDetailList.insert(0,memberdict4)
-#         # memberDetailList.insert(0,memberdict4)
-
-        
-#     return jsonify(code=RET.OK, flag=True, message='获取所有人每个科研项目分配信息成功',detail=memberDetailList, project=projectList, total=totalnum)
 
 # 获取所有人每个科研项目分多少钱的总体信息
 @general_blue.route('/getresdetail/<int:planId>/<int:page>/<int:size>', methods=['GET'])
@@ -658,6 +570,7 @@ def getResAllDetail(planId,page,size):
         memberdict['total'] = total
         memberDetailList.append(memberdict)
     
+    # 若选择第一页，在最上方添加各项目的汇总信息
     if(page==1):
         amount = 0
         amount_zhan = 0
@@ -765,6 +678,7 @@ def getManAllDetail(planId,page,size):
         memberdict['total'] = total
         memberDetailList.append(memberdict)
     
+    # 若选择第一页，在最上方添加各项目的汇总信息
     if(page==1):
         amount_zhan = 0
         amount_buzhan = 0
@@ -870,14 +784,6 @@ def getAllDetail(planId):
         for detail in memberAllDetail:
             memberdict[str(detail.projectId)] = detail.amount
             total += detail.amount
-
-        # # 所有管理项目
-        # for project in allProject:
-        #     memberdetail = UserDetailModel.query.filter_by(planId=planId, projectId=project.projectId, projectType=1, userId=member.id).first()
-        #     if(memberdetail is None):
-        #         memberdict[str(project.projectId)] = 0
-        #     else: 
-        #         memberdict[str(project.projectId)] = memberdetail.amount
         
         # 科研项目总和
         allResDetail = UserDetailModel.query.filter_by(planId=planId, projectType=0, userId=member.id).all()

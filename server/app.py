@@ -46,5 +46,8 @@ if __name__ == "__main__":
     # print(app.url_map)
     # db.drop_all() 
     db.create_all()
-    app.run()
+
+    from waitress import serve
+    from paste.translogger import TransLogger
+    serve(TransLogger(app),port=5000)
 
