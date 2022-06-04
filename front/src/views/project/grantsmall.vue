@@ -267,8 +267,13 @@ export default {
             let totalb = 0
             let flag0 = false
             let flag1 = false
+            let flag2 = false
             if(this.curRow.projectType==0){
                 this.memberDetailForm.memberDetailList.forEach((member, index) => {
+                    if(member.category==15){
+                        flag2 = true
+                        return
+                    }
                     if(member.bonus_category=='管理' || member.bonus_category=='固定发放' || member.position == 'A类' || member.position == 'B类'){
                         if(parseFloat(member.amount) >0 ){
                             flag0 = true
@@ -282,6 +287,10 @@ export default {
                 })
             }else{
                 this.memberDetailForm.memberDetailList.forEach((member, index) => {
+                    if(member.category==15){
+                        flag2 = true
+                        return
+                    }
                     if(member.bonus_category=='科研' || member.bonus_category=='固定发放' || member.position == 'C类'){
                         if(parseFloat(member.amount) >0 ){
                             flag1 = true
@@ -292,15 +301,15 @@ export default {
                         if(member.amount == '') total += 0
                         else total += parseFloat(member.amount)
                     }else{
-                        // if(member.position == 'B类'){
-                        //     if(member.amount == '') totalb += 0
-                        //     else totalb += parseFloat(member.amount)
-                        // }
                         if(member.amount == '') totalb += 0
                         else totalb += parseFloat(member.amount)
                     }
-
                 })
+            }
+
+            if(flag2){
+                this.$message.error('离职人员不能发放奖金')
+                return false
             }
 
             if(flag0){
@@ -322,8 +331,6 @@ export default {
                 this.$message.error('已分发总额(不占工资B类)超过奖金包')
                 return false
             }
-
-            // console.log(this.memberDetailForm.memberDetailList)
 
             this.memberDetailForm.bonusId = this.curRow.bonusId
             this.memberDetailForm.planId = this.curChosenPlan
@@ -370,7 +377,9 @@ export default {
             formData.append('username',this.newMember)
             
             projectApi.addMember(formData).then(response =>{
-                //this.closeManage()
+                if(!response.flag) {
+                    this.$message.error(response.message)
+                }
                 this.newMember=''
             })
         },
@@ -442,10 +451,15 @@ export default {
                     let totalb = 0
                     let flag0 = false
                     let flag1 = false
+                    let flag2 = false
                     let row = vm.proDetailList[vm.curRowIndex]
 
                     if(row.projectType==0){
                         excelRows.forEach((member, index) => {
+                            if(member['类别']=='离职（不发放）'){
+                                flag2 = true
+                                return
+                            }
                             if(member['奖金库']=='管理' || member['奖金库']=='固定发放' || member['岗位'] == 'A类' || member['岗位'] == 'B类'){
                                 if(parseFloat(member['金额']) >0 ){
                                     flag0 = true
@@ -459,6 +473,10 @@ export default {
                         })
                     }else{
                         excelRows.forEach((member, index) => {
+                            if(member['类别']=='离职（不发放）'){
+                                flag2 = true
+                                return
+                            }
                             if(member['奖金库']=='科研' || member['奖金库']=='固定发放' || member['岗位'] == 'C类'){
                                 if(parseFloat(member['金额']) >0 ){
                                     flag1 = true
@@ -478,6 +496,11 @@ export default {
                             }
                         })
                     }
+                    if(flag2){
+                        this.$message.error('离职人员不能发放奖金')
+                        return false
+                    }
+
                     if(flag0){
                         this.$message.error('科研项目不能发放给奖金库为管理或固定发放及A类、B类的人员')
                         return false

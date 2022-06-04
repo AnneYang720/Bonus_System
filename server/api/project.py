@@ -249,6 +249,8 @@ def addMember():
 
     if (user is None):
         return jsonify(code=RET.NODATA, flag=False, message='该姓名不存在')
+    if(user.category==15):
+        return jsonify(code=RET.NODATA, flag=False, message='该用户已离职')
 
     if(projectType=='1'):
         if(user.bonus_category=="科研" or user.bonus_category=="固定发放"):
@@ -310,9 +312,9 @@ def getMemberDetail():
 
         memberdetail = UserDetailModel.query.filter_by(planId=planId, projectId=projectId, projectType=projectType, userId=member.userId).first()
         if(memberdetail is None):
-            memberDetailList.append({"userId":member.userId, "username":username, "user_category":user_category,"position":user.position,"bonus_category":user.bonus_category,"amount":0})
+            memberDetailList.append({"userId":member.userId, "username":username, "user_category":user_category,"position":user.position,"bonus_category":user.bonus_category, "category":user.category, "amount":0})
         else:
-            memberDetailList.append({"userId":member.userId, "username":username, "user_category":user_category, "position":user.position, "bonus_category":user.bonus_category,"amount":memberdetail.amount})
+            memberDetailList.append({"userId":member.userId, "username":username, "user_category":user_category, "position":user.position, "bonus_category":user.bonus_category, "category":user.category, "amount":memberdetail.amount})
     
     return jsonify(code=RET.OK, flag=True, message='获取该项目成员详细信息成功', data=memberDetailList)
 

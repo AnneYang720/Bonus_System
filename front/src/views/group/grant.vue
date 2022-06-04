@@ -369,7 +369,6 @@ export default {
                             }
                         })
                     }else{
-                        
                         excelRows.forEach((member, index) => {
                             if( parseFloat(member['金额'])>0.00001 && (member['奖金库']=='固定发放' || member['岗位'] == 'C类')){
                                 flag1 = true
@@ -384,8 +383,6 @@ export default {
                                 
                             }
                         })
-                        
-                        
                     }
 
                     if(flag0){
@@ -402,10 +399,6 @@ export default {
                         vm.$message.error('管理项目不能发放给奖金库为科研或固定发放的人员')
                         return false
                     }
-
-
-                    console.log('uploadone')
-                    console.log(total)
 
                     if(total-row.amount>0.00001 || row.amount-total>0.00001){
                         vm.$message.error('已分发总额(占工资)与奖金包不相等')

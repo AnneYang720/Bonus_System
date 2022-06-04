@@ -109,6 +109,7 @@ def getMemberDetail():
         # if(member.id==keshi_manager): continue
         # print(member.bonus_category)
         if(member.bonus_category=="固定发放"): continue
+        if(member.category==15): continue
 
         username = member.username + '(' + member.wage_category + ')'
 
@@ -270,15 +271,14 @@ def getKeshiAllDetail(planId):
 
     for member in allMember:
         if(member.bonus_category=="固定发放"): continue
+        if(member.category==15): continue
         category = CategoryModel.query.get(member.category).name
 
         memberdict = {"userId":member.id,"department":member.department,"keshi":keshi.name,"username":member.username,
             "idnum":member.idnum+"\u200b","category":category,"wage_category":member.wage_category,"position":member.position,
             "remarks":member.remarks,"bonus_category":member.bonus_category}
        
-
         memberdetail = UserDetailModel.query.filter_by(planId=planId, userId=member.id).all()
-        
         
         total = 0
         for detail in memberdetail:
@@ -296,7 +296,6 @@ def getKeshiAllDetail(planId):
 
             if(key not in projectTmp):
                 projectTmp.add(key)
-                # print(detail)
                 if(detail.projectType==0): 
                     pro = ResearchModel.query.get(detail.projectId)
                     name = pro.number + ": "+ pro.name
@@ -359,6 +358,7 @@ def getKeshiMember(keshiId):
 
     for member in memberInfo:
         if(member.bonus_category=="固定发放"): continue
+        if(member.category==15): continue
         category = CategoryModel.query.get(member.category).name
         memberList.append([keshi.name, member.username,member.idnum, category, member.wage_category, member.bonus_category, member.position, member.remarks])
 
