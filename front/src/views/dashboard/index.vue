@@ -3,7 +3,7 @@
   <img src="/static/img/206.PNG" class="frontpic"/>
   <div style="font-size:32px;color:#130B52;text-align:center;margin-top:1%">欢迎使用</div> 
   <div style="font-size:32px;color:#130B52;text-align:center;margin-top:1%">设计所奖金核算管理系统</div> 
-  <div style="font-size:32px;color:#130B52;text-align:center;margin-top:1%">(试行版)</div>
+  <div style="font-size:32px;color:#130B52;text-align:center;margin-top:1%">(V2.3)</div>
 </div>
 </template>
 

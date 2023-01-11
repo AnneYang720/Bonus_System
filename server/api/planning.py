@@ -14,7 +14,8 @@ from sqlalchemy import func
 @planning_blue.route('/getprojectlist/<int:page>/<int:size>', methods=['GET'])
 @authorize
 def getProjectList(page,size): 
-    total = db.session.query(db.func.count(ResearchModel.id)).scalar()
+    total = ResearchModel.query.count()
+    # total = db.session.query(db.func.count(ResearchModel.id)).scalar()
 
     projectInfo = ResearchModel.query.paginate(page,per_page=size)
 
@@ -156,7 +157,7 @@ def importProjects():
         if(research_b):
             return jsonify(code=RET.DBERR, flag=False, message='项目'+row['项目名称']+'的所级编号已存在')
 
-        user = UsersModel.query.filter_by(idnum=row['项目经理身份证号']).first()
+        user = UsersModel.query.filter_by(worknum=row['项目经理工号']).first()
         isBig = True if row['是否为大项目']=='是' else False
         research = ResearchModel(number=row['所级项目编号'],name=row['项目名称'], manager=user.id, isBig=isBig, state=row['状态'])
         result = ResearchModel.add(ResearchModel, research)

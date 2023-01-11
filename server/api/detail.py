@@ -150,7 +150,8 @@ def createManProjectDetailFromFile():
                 detail.amountb = row['金额（不占工资总额）']
                 detail.update()
             else:
-                detail = BonusDetailModel(planId=planId, projectId=projectId, projectType=1, amount=row['金额（占工资总额）'], amount_b=row['金额（不占工资总额）'])
+                detail = BonusDetailModel(planId=planId, projectId=projectId, projectType=1, amount=row['金额（占工资总额）'])
+                detail.amount_b = row['金额（不占工资总额）']
                 result = BonusDetailModel.add(BonusDetailModel, detail)
 
     return jsonify(code=RET.OK, flag=True, message='导入分配模板成功')

@@ -51,6 +51,14 @@
         </template>
       </el-table-column>
 
+      <el-table-column
+        label="操作"
+        min-width="6%">
+        <template slot-scope="scope">
+          <el-button @click.native.stop="handleDel(scope.row)" type="text" size="small">删除</el-button>
+        </template>
+      </el-table-column>
+
     </el-table>
 
 
@@ -169,7 +177,16 @@ export default {
               this.closeChange()
             })
           }
-          
+        },
+
+        handleDel(row){
+            generalApi.delProject(row.id).then(async(response) => {
+                if(response.flag){//如果成功
+                    this.$message.success(response.message)
+                    this.fetchProjectList()
+                }
+            })
+            
         },
 
         beforeChange(){

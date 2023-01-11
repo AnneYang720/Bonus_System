@@ -74,6 +74,13 @@ export default{
         })
     },
 
+    delProject(projectId){
+        return request({
+            url: `/general/del/${projectId}`, //ES6写法
+            method: 'delete',    
+        })
+    },
+
     getPlanList(){
         return request({
             url: `/general/getplanlist`,

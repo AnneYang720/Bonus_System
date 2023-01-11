@@ -263,6 +263,17 @@ def createManageProject():
     else:
         return jsonify(code=RET.DBERR, flag=False, message='新增管理项目失败')
 
+# 删除管理项目
+@general_blue.route('/del/<int:id>', methods=['DELETE'])
+@authorize
+def delManageProject(id): 
+    project = ManageModel.query.get(id)
+    if (project is None):
+        return jsonify(code=RET.NODATA, flag=False, message='该管理项目不存在')
+    project.delete(id)
+    return jsonify(code=RET.OK, flag=True, message='删除管理项目成功')
+
+
 # 修改管理项目
 @general_blue.route('/changeproject', methods=['POST'])
 @authorize
@@ -538,6 +549,7 @@ def getResAllDetail(planId,page,size):
 
 
     for member in allMember:
+        if(member.category==15): continue
         total = 0
         # keshi = KeshiModel.query.get(member.keshi).name
         keshi = keshiInfo[member.keshi]
@@ -641,6 +653,7 @@ def getManAllDetail(planId,page,size):
 
 
     for member in allMember:
+        if(member.category==15): continue
         total = 0
         keshi = keshiInfo[member.keshi]
         category = categoryInfo[member.category]
@@ -748,7 +761,7 @@ def getManHistory():
 @general_blue.route('/getdetail/<int:planId>', methods=['GET'])
 @authorize
 def getAllDetail(planId): 
-    allMember = UsersModel.query.filter(UsersModel.category!=14).all()
+    allMember = UsersModel.query.filter(UsersModel.category!=15).all()
     allProject = BonusDetailModel.query.filter_by(planId=planId, projectType=1).all()
 
     allKeshi = KeshiModel.query.all()

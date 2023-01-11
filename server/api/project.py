@@ -1,6 +1,4 @@
 from flask import g, current_app, jsonify, request, session
-from pyrsistent import v
-from server.models import category
 
 # from server.app import db
 # from server.api.models import User

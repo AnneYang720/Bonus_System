@@ -233,6 +233,7 @@ export default {
 
         handleSizeChange(val) {
           this.pageSize = val;
+          this.currentPage = 1;
           this.handleSearch();
         },
 
@@ -245,6 +246,7 @@ export default {
         handleSearch(){
           if(this.keyword==='') this.fetchProjectList()
           else {
+            this.currentPage = 1;
             planningApi.search(this.currentPage, this.pageSize, this.keyword).then(response =>{
                 this.total = response.total
                 this.projectList = response.data
@@ -274,7 +276,7 @@ export default {
         },
 
         exportTemp(){
-            var list = [["所级项目编号","项目名称","项目经理","项目经理身份证号","是否为大项目","状态"]]
+            var list = [["所级项目编号","项目名称","项目经理","项目经理工号","是否为大项目","状态"]]
 
             var ws = XLSX.utils.aoa_to_sheet(list)
             var wb = XLSX.utils.book_new()

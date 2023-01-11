@@ -226,7 +226,7 @@ export default {
             if(this.curRow.projectType==0){
                 this.memberDetailForm.memberDetailList.forEach((member, index) => {
                     if(member.bonus_category=='管理' || member.bonus_category=='固定发放' || member.position == 'A类' || member.position == 'B类'){
-                        if(parseFloat(member.amount) >0 ){
+                        if(parseFloat(member.amount) >0.00001 ){
                             flag0 = true
                             return
                         }

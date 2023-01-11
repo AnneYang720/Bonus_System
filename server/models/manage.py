@@ -37,9 +37,9 @@ class ManageModel(db.Model):
     def update(self):
         return session_commit()
 
-    def delete(self, ids):
-        # self.query.filter_by(id=id).delete()
-        self.query.filter(self.id.in_(ids)).delete(synchronize_session=False)
+    def delete(self, id):
+        self.query.filter_by(id=id).delete()
+        # self.query.filter(self.id.in_(ids)).delete(synchronize_session=False)
         return session_commit()
 
 

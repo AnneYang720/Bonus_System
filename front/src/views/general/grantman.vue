@@ -51,7 +51,7 @@
 
       <el-table-column
         prop="amountb"
-        label="B类分配金额"
+        label="分配金额(不占工资总额)"
         min-width="20%">
       </el-table-column>
 
@@ -147,6 +147,9 @@
 import planningApi from '@/api/planning'
 import generalApi from '@/api/general'
 import detailApi from '@/api/detail'
+import XLSX from 'xlsx'
+import FileSaver from 'file-saver'
+import {pFileReader} from '@/utils/filereader'
 
 export default {
     data(){
@@ -341,7 +344,7 @@ export default {
                 let wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'array' })
                 
                 try {
-                    FileSaver.saveAs(new Blob([wbout], { type: 'application/octet-stream' }), '科研项目模板.xlsx')
+                    FileSaver.saveAs(new Blob([wbout], { type: 'application/octet-stream' }), '管理项目模板.xlsx')
                 } catch (e) { 
                     if (typeof console !== 'undefined') console.log(e, wbout) 
                 }
