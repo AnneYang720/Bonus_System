@@ -239,7 +239,7 @@ export default {
             }else{
                 this.memberDetailForm.memberDetailList.forEach((member, index) => {
                     
-                    if(member.bonus_category=='固定发放' || member.position == 'C类'){
+                    if(member.bonus_category=='固定发放'){
                         if(parseFloat(member.amount) >0.00001 ){
                             flag1 = true
                             return
@@ -249,7 +249,7 @@ export default {
                         if(member.amount == '') total += 0
                         else total += parseFloat(member.amount)
                     }else{
-                        if(member.amount == '') totalb += 0
+                        if(member.amount == '' || member.position == 'C类') totalb += 0
                         else totalb += parseFloat(member.amount)
                     }
                 })
@@ -262,7 +262,7 @@ export default {
             }
 
             if(flag1){
-                this.$message.error('管理项目不能发放给奖金库为固定发放及C类的人员')
+                this.$message.error('管理项目不能发放给奖金库为固定发放的人员')
                 return false
             }
 
@@ -370,7 +370,7 @@ export default {
                         })
                     }else{
                         excelRows.forEach((member, index) => {
-                            if( parseFloat(member['金额'])>0.00001 && (member['奖金库']=='固定发放' || member['岗位'] == 'C类')){
+                            if( parseFloat(member['金额'])>0.00001 && member['奖金库']=='固定发放'){
                                 flag1 = true
                                 return
                             }
@@ -378,9 +378,8 @@ export default {
                                 if(typeof(member['金额'])=="undefined" || member['金额'] == 0) total += 0
                                 else total += parseFloat(member['金额'])
                             }else{
-                                if(typeof(member['金额'])=="undefined" || member['金额'] == 0) totalb += 0
+                                if(typeof(member['金额'])=="undefined" || member['金额'] == 0 || member['岗位'] == 'C类') totalb += 0
                                 else totalb += parseFloat(member['金额'])
-                                
                             }
                         })
                     }
@@ -391,7 +390,7 @@ export default {
                     }
 
                     if(flag1){
-                        vm.$message.error('管理项目不能发放给奖金库为固定发放及C类的人员')
+                        vm.$message.error('管理项目不能发放给奖金库为固定发放的人员')
                         return false
                     }
 
@@ -509,7 +508,7 @@ export default {
                             })
                         }else{
                             excelRows.forEach((member, rowIndex) => {
-                                if(parseFloat(member[project.projectName])>0.00001 &&(member['奖金库']=='固定发放' || member['岗位'] == 'C类')){
+                                if(parseFloat(member[project.projectName])>0.00001 && member['奖金库']=='固定发放'){
                                     flag1 = true
                                     return
                                 }
@@ -517,7 +516,7 @@ export default {
                                     if(typeof(member[project.projectName])=="undefined" || member[project.projectName] == 0) total += 0
                                     else total += parseFloat(member[project.projectName])
                                 }else{
-                                    if(typeof(member[project.projectName])=="undefined" || member[project.projectName] == 0) totalb += 0
+                                    if(typeof(member[project.projectName])=="undefined" || member[project.projectName] == 0 || member['岗位'] == 'C类') totalb += 0
                                     else totalb += parseFloat(member[project.projectName])
                                 }
                             })
@@ -532,7 +531,7 @@ export default {
                         }
 
                         if(flag1){
-                            vm.$message.error('管理项目'+project.projectName+'不能发放给奖金库为固定发放及C类的人员')
+                            vm.$message.error('管理项目'+project.projectName+'不能发放给奖金库为固定发放的人员')
                             flag = true
                             return false
                         }
