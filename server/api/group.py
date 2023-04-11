@@ -79,7 +79,7 @@ def getProgressList(planId):
             keshiProgressList[keshiInfo[detail.keshiId]]["state"]=1
     
     manProjectDetail = BonusDetailModel.query.filter_by(planId=planId, projectType=1).all()
-    for detail in manProjectDetail:
+    for detail in manProjectDetail:       
         if(detail.amount_zhan!=detail.amount):
             userId = ManageModel.query.get(detail.projectId).manager
             keshiId = KeshiModel.query.filter_by(manager=userId).first().id
@@ -137,6 +137,7 @@ def exportMemberDetail():
 
     for member in memberInfo:
         if(member.bonus_category=="固定发放"): continue
+        if(member.category==15): continue
         category = CategoryModel.query.get(member.category).name
 
         memberdetail = UserDetailModel.query.filter_by(planId=planId, projectId=projectId, projectType=projectType, userId=member.id).first()

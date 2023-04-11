@@ -122,7 +122,7 @@ def getCategoryList():
     categoryList = []
     for category in categoryInfo:
         categoryList.append(category.name)
-    return jsonify(code=RET.OK, flag=True , message='获取科室信息成功', data = categoryList)
+    return jsonify(code=RET.OK, flag=True , message='获取类别信息成功', data = categoryList)
 
 # 修改用户信息
 @general_blue.route('/changeuser', methods=['POST'])
