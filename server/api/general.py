@@ -82,6 +82,28 @@ def searchProject(page,size):
     db.session.commit()    
     return jsonify(code=RET.OK, flag=True, message='搜索用户成功', data=userList, total=total)
 
+# 筛选用户
+@general_blue.route('/filter', methods=['POST'])
+@authorize
+def FilterUser():
+    
+    keshi = request.form.get('keshi').split(',')
+    category = request.form.get('category').split(',')
+    page = int(request.form.get('currentPage'))
+    size = int(request.form.get('pageSize'))
+
+    # find category ids from db
+    categories = CategoryModel.query.filter(CategoryModel.name.in_(category)).all()
+    category_ids = [x.id for x in categories]
+
+    total = db.session.query(db.func.count(UsersModel.id)).filter(UsersModel.keshi.in_(keshi),UsersModel.category.in_(category_ids)).scalar()
+
+    userInfo = UsersModel.query.filter(UsersModel.keshi.in_(keshi),UsersModel.category.in_(category_ids)).paginate(page,per_page=size)
+
+    userList = makeUserList(userInfo.items)
+    db.session.commit()    
+    return jsonify(code=RET.OK, flag=True, message='搜索用户成功', data=userList, total=total)
+
 
 # 获取某个科室所有user的信息
 @general_blue.route('/getkeshilistbykeshi', methods=['GET'])

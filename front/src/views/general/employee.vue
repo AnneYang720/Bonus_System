@@ -13,6 +13,30 @@
         <el-button type="warning" plain @click="exportExcel()">导出</el-button>
     </el-form>
 
+    <el-form :inline="true" align="left" style="margin-left:5%;margin-top:2%">
+      <el-select v-model="keyword_keshi" multiple placeholder="Select">
+        <el-option
+          v-for="item in keshiList"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id">
+        </el-option>
+      </el-select>
+
+      <el-select v-model="keyword_category" multiple placeholder="Select">
+        <el-option
+          v-for="item in categoryList"
+          :key="item"
+          :label="item"
+          :value="item">
+        </el-option>
+      </el-select>
+
+      <el-button @click="handleFilter()" type="primary" plain>筛选</el-button>
+
+    </el-form>
+    
+
 
 
     <el-table
@@ -298,10 +322,12 @@ export default {
                 remarks: '',
                 bonus_category: '',
                 password: '',
-			      },
+			},
 
             pwdType: 'password',
             keyword:'', //搜索关键词
+            keyword_keshi:[],
+            keyword_category:[],
             total: 0,
             currentPage: 1,
             pageSize: 10,
@@ -496,6 +522,25 @@ export default {
             if(this.keyword==='') this.fetchUsersList()
             else {
                 generalApi.search(this.currentPage, this.pageSize, this.keyword).then(response =>{
+                    this.total = response.total
+                    this.userList = response.data
+                }).catch(() => {
+                    this.total = 0
+                    this.userList = []
+                });
+            }
+        },
+
+        handleFilter(){
+            if(this.keyword_keshi.length==0 && this.keyword_category.length==0) this.fetchUsersList()
+            else {
+                const formData = new FormData()
+                formData.append('keshi', this.keyword_keshi)
+                formData.append('category', this.keyword_category)
+                formData.append('pageSize', this.pageSize)
+                formData.append('currentPage', this.currentPage)
+
+                generalApi.filter(formData).then(response =>{
                     this.total = response.total
                     this.userList = response.data
                 }).catch(() => {

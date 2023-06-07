@@ -51,6 +51,14 @@ export default{
         });
     },
 
+    filter(pojo){
+        return request({
+            url: `/general/filter`,//ES6写法
+            method: 'post',
+            data: pojo
+        });
+    },
+
     getProjectList(){
         return request({
             url: `/general/getprojectlist`,
@@ -208,3 +216,4 @@ export default{
     },
 
 } 
+
