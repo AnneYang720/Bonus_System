@@ -44,16 +44,9 @@ export default{
         })
     },
 
-    search(page,size,keyword){
+    search(pojo){
         return request({
-            url: `/general/search/${page}/${size}?q=${keyword}`,//ES6写法
-            method: 'get',
-        });
-    },
-
-    filter(pojo){
-        return request({
-            url: `/general/filter`,//ES6写法
+            url: `/general/search`,//ES6写法
             method: 'post',
             data: pojo
         });
@@ -153,7 +146,6 @@ export default{
             method: 'get'
         });
     },
-
 
     addKeshi(pojo){
         return request({

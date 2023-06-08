@@ -4,40 +4,32 @@
 
     <el-form :inline="true" align="left" style="margin-left:5%;margin-top:2%">     
         <el-form-item >
-            <el-input v-model="keyword"></el-input>
+            <el-input v-model="keyword" placeholder="姓名"></el-input>
         </el-form-item>
+
+        <el-select v-model="keyword_keshi" multiple placeholder="选择科室">
+            <el-option
+                v-for="item in keshiList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+            </el-option>
+        </el-select>
+
+        <el-select v-model="keyword_category" multiple placeholder="选择类别">
+            <el-option
+                v-for="item in categoryList"
+                :key="item"
+                :label="item"
+                :value="item">
+            </el-option>
+        </el-select>
         
         <el-button @click="handleSearch()" type="primary" plain>搜索</el-button>
         
         <el-button @click="openAdd" type="primary" icon="el-icon-plus"  plain>添加人员</el-button>
         <el-button type="warning" plain @click="exportExcel()">导出</el-button>
     </el-form>
-
-    <el-form :inline="true" align="left" style="margin-left:5%;margin-top:2%">
-      <el-select v-model="keyword_keshi" multiple placeholder="Select">
-        <el-option
-          v-for="item in keshiList"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id">
-        </el-option>
-      </el-select>
-
-      <el-select v-model="keyword_category" multiple placeholder="Select">
-        <el-option
-          v-for="item in categoryList"
-          :key="item"
-          :label="item"
-          :value="item">
-        </el-option>
-      </el-select>
-
-      <el-button @click="handleFilter()" type="primary" plain>筛选</el-button>
-
-    </el-form>
-    
-
-
 
     <el-table
       :data="userList"
@@ -371,8 +363,8 @@ export default {
         
         emptyDict(dict_){
           for (var key in dict_) {
-　　          var item = dict_[key];
-　　          console.log(item); 
+              var item = dict_[key];
+              console.log(item); 
               dict_[key] ='';
           }
         },
@@ -419,7 +411,7 @@ export default {
         },
 
         closeChange(){
-          this.fetchUsersList()
+          this.handleSearch()
           this.changeVisible = false
         },
         
@@ -519,28 +511,18 @@ export default {
 
 
         handleSearch(){
-            if(this.keyword==='') this.fetchUsersList()
-            else {
-                generalApi.search(this.currentPage, this.pageSize, this.keyword).then(response =>{
-                    this.total = response.total
-                    this.userList = response.data
-                }).catch(() => {
-                    this.total = 0
-                    this.userList = []
-                });
+            if(this.keyword==='' && this.keyword_keshi.length==0 && this.keyword_category.length==0) {
+                this.fetchUsersList()
             }
-        },
-
-        handleFilter(){
-            if(this.keyword_keshi.length==0 && this.keyword_category.length==0) this.fetchUsersList()
             else {
                 const formData = new FormData()
                 formData.append('keshi', this.keyword_keshi)
                 formData.append('category', this.keyword_category)
+                formData.append('keyword', this.keyword)
                 formData.append('pageSize', this.pageSize)
                 formData.append('currentPage', this.currentPage)
 
-                generalApi.filter(formData).then(response =>{
+                generalApi.search(formData).then(response =>{
                     this.total = response.total
                     this.userList = response.data
                 }).catch(() => {

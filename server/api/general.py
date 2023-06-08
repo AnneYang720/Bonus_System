@@ -71,39 +71,34 @@ def getUsersList(page,size):
     return jsonify(code=RET.OK, flag=True , message='获取user信息成功', data=userList, total=total)
 
 # 查找用户
-@general_blue.route('/search/<int:page>/<int:size>', methods=['GET'])
+@general_blue.route('/search', methods=['POST'])
 @authorize
-def searchProject(page,size):
-    keyword = request.args.get('q')
-    total = db.session.query(db.func.count(UsersModel.id)).filter(UsersModel.username.like("%"+keyword+"%")).scalar()
-
-    userInfo = UsersModel.query.filter(UsersModel.username.like("%"+keyword+"%")).paginate(page,per_page=size)
-    userList = makeUserList(userInfo.items)
-    db.session.commit()    
-    return jsonify(code=RET.OK, flag=True, message='搜索用户成功', data=userList, total=total)
-
-# 筛选用户
-@general_blue.route('/filter', methods=['POST'])
-@authorize
-def FilterUser():
-    
-    keshi = request.form.get('keshi').split(',')
-    category = request.form.get('category').split(',')
+def searchUser():
+    keshi = request.form.get('keshi', None)
+    category = request.form.get('category', None)
+    keyword = request.form.get('keyword')
     page = int(request.form.get('currentPage'))
     size = int(request.form.get('pageSize'))
 
-    # find category ids from db
-    categories = CategoryModel.query.filter(CategoryModel.name.in_(category)).all()
-    category_ids = [x.id for x in categories]
+    # build query, if any of the filter is empty, then ignore it
+    query = UsersModel.query
+    if keshi:
+        query = query.filter(UsersModel.keshi.in_(keshi.split(',')))
+    if category:
+        # find category ids from db
+        categories = CategoryModel.query.filter(CategoryModel.name.in_(category.split(','))).all()
+        category_ids = [x.id for x in categories]
+        query = query.filter(UsersModel.category.in_(category_ids))
+    if keyword:
+        query = query.filter(UsersModel.username.like("%"+keyword+"%"))
 
-    total = db.session.query(db.func.count(UsersModel.id)).filter(UsersModel.keshi.in_(keshi),UsersModel.category.in_(category_ids)).scalar()
-
-    userInfo = UsersModel.query.filter(UsersModel.keshi.in_(keshi),UsersModel.category.in_(category_ids)).paginate(page,per_page=size)
+    # execute query
+    total = query.count()
+    userInfo = query.paginate(page,per_page=size)
 
     userList = makeUserList(userInfo.items)
     db.session.commit()    
     return jsonify(code=RET.OK, flag=True, message='搜索用户成功', data=userList, total=total)
-
 
 # 获取某个科室所有user的信息
 @general_blue.route('/getkeshilistbykeshi', methods=['GET'])
