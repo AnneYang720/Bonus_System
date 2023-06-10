@@ -7,18 +7,28 @@
             <el-input v-model="keyword" placeholder="姓名"></el-input>
         </el-form-item>
 
-        <el-select v-model="keyword_keshi" multiple placeholder="选择科室">
+        <el-select
+          v-model="keyword_keshi"
+          multiple
+          collapse-tags
+          placeholder="选择科室"
+          @change="handleKeshiChange">
             <el-option
-                v-for="item in keshiList"
+                v-for="item in keshiSelList"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id">
             </el-option>
         </el-select>
 
-        <el-select v-model="keyword_category" multiple placeholder="选择类别">
+        <el-select
+          v-model="keyword_category"
+          multiple
+          collapse-tags
+          placeholder="选择类别"
+          @change="handleCategoryChange">
             <el-option
-                v-for="item in categoryList"
+                v-for="item in categorySelList"
                 :key="item"
                 :label="item"
                 :value="item">
@@ -318,8 +328,15 @@ export default {
 
             pwdType: 'password',
             keyword:'', //搜索关键词
+
+            keshiSelList:[],  // keshiList + 'ALL_SELECT'
             keyword_keshi:[],
+            keyword_keshi_old:[],
+
+            categorySelList:[],
             keyword_category:[],
+            keyword_category_old:[],
+
             total: 0,
             currentPage: 1,
             pageSize: 10,
@@ -344,8 +361,10 @@ export default {
 
         fetchKeshiList(){
             // console.log("fetch"+this.currentPage+' '+this.pageSize);
+            let _all = {id:'ALL_SELECT', name:'全选'}
             generalApi.getKeshiList().then(response =>{
                 this.keshiList = response.data;
+                this.keshiSelList = [_all].concat(this.keshiList)
             }).catch((err) => {
                 this.keshiList = []
             })  
@@ -353,12 +372,13 @@ export default {
 
         fetchCategoryList(){
             // console.log("fetch"+this.currentPage+' '+this.pageSize);
+            let _all = '全选'
             generalApi.getCategoryList().then(response =>{
                 this.categoryList = response.data;
+                this.categorySelList = [_all].concat(this.categoryList)
             }).catch((err) => {
                 this.categoryList = []
-            })  
-                
+            })
         },
         
         emptyDict(dict_){
@@ -509,15 +529,90 @@ export default {
             this.handleSearch();
         },
 
+        // 全选支持，来自 https://blog.csdn.net/sleepwalker_1992/article/details/88876114
+        handleKeshiChange(val) {
+          const allValues = this.keshiSelList.map(item => {
+            return item.id;
+          });
+          // 用来储存上一次选择的值，可进行对比
+          const oldVal = this.keyword_keshi_old.length > 0 ? this.keyword_keshi_old : [];
+    
+          // 若选择全部
+          if (val.includes('ALL_SELECT')) {
+            this.keyword_keshi = allValues;
+          }
+    
+          // 取消全部选中， 上次有， 当前没有， 表示取消全选
+          if (oldVal.includes('ALL_SELECT') && !val.includes('ALL_SELECT')) {
+            this.keyword_keshi = [];
+          }
+    
+          // 点击非全部选中，需要排除全部选中 以及 当前点击的选项
+          // 新老数据都有全部选中
+          if (oldVal.includes('ALL_SELECT') && val.includes('ALL_SELECT')) {
+            const index = val.indexOf('ALL_SELECT');
+            val.splice(index, 1); // 排除全选选项
+            this.keyword_keshi = val;
+          }
+    
+          // 全选未选，但是其他选项都全部选上了，则全选选上
+          if (!oldVal.includes('ALL_SELECT') && !val.includes('ALL_SELECT')) {
+            if (val.length === allValues.length - 1) {
+              this.keyword_keshi = ['ALL_SELECT'].concat(val);
+            }
+          }
+    
+          // 储存当前选择的最后结果 作为下次的老数据
+          this.keyword_keshi_old = this.keyword_keshi;
+	      },
 
+        handleCategoryChange(val) {
+          const allValues = this.categorySelList;
+          // 用来储存上一次选择的值，可进行对比
+          const oldVal = this.keyword_category_old.length > 0 ? this.keyword_category_old : [];
+    
+          // 若选择全部
+          if (val.includes('全选')) {
+            this.keyword_category = allValues;
+          }
+    
+          // 取消全部选中， 上次有， 当前没有， 表示取消全选
+          if (oldVal.includes('全选') && !val.includes('全选')) {
+            this.keyword_category = [];
+          }
+    
+          // 点击非全部选中，需要排除全部选中 以及 当前点击的选项
+          // 新老数据都有全部选中
+          if (oldVal.includes('全选') && val.includes('全选')) {
+            const index = val.indexOf('全选');
+            val.splice(index, 1); // 排除全选选项
+            this.keyword_category = val;
+          }
+    
+          // 全选未选，但是其他选项都全部选上了，则全选选上
+          if (!oldVal.includes('全选') && !val.includes('全选')) {
+            if (val.length === allValues.length - 1) {
+              this.keyword_category = ['全选'].concat(val);
+            }
+          }
+    
+          // 储存当前选择的最后结果 作为下次的老数据
+          this.keyword_category_old = this.keyword_category;
+	      },
+
+        // 人员搜索
         handleSearch(){
             if(this.keyword==='' && this.keyword_keshi.length==0 && this.keyword_category.length==0) {
                 this.fetchUsersList()
             }
             else {
                 const formData = new FormData()
-                formData.append('keshi', this.keyword_keshi)
-                formData.append('category', this.keyword_category)
+                // remove ALL_SELECT from keyword_keshi and keyword_category
+                let keyword_keshi = this.keyword_keshi.filter(item => item !== 'ALL_SELECT')
+                let keyword_category = this.keyword_category.filter(item => item !== 'ALL_SELECT')
+
+                formData.append('keshi', keyword_keshi)
+                formData.append('category', keyword_category)
                 formData.append('keyword', this.keyword)
                 formData.append('pageSize', this.pageSize)
                 formData.append('currentPage', this.currentPage)
